@@ -23,7 +23,8 @@ RUN curl -Ls -o sbt.tar.gz "https://github.com/sbt/sbt/releases/download/v${SBT_
     && chmod 755 sbt/bin/sbt \
     && chown root:root sbt \
     && mv sbt ${BUILD_PATH}/ \
-    && ln -s ${BUILD_PATH}/sbt/bin/sbt /usr/bin
+    && ln -s ${BUILD_PATH}/sbt/bin/sbt /usr/bin \
+    && mkdir -p ~/.sbt/1.0/plugins/
 
 RUN curl -s -o docker.tar.gz "https://download.docker.com/linux/static/stable/x86_64/docker-${DOCKER_VERSION}.tgz" \
     && tar -xzvf docker.tar.gz \
