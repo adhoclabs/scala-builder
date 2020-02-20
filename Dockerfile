@@ -11,7 +11,7 @@ RUN mkdir -p ${BUILD_PATH}
 WORKDIR /tmp
 
 RUN apk add --no-cache --update \
-    bash ca-certificates curl git openssh openssl python tar
+    bash ca-certificates curl git openssh openssl python tar ncurses
 
 RUN curl -s -o awscli-bundle.zip "https://s3.amazonaws.com/aws-cli/awscli-bundle-${AWS_CLI_VERSION}.zip" \
     && unzip awscli-bundle.zip \
