@@ -1,7 +1,7 @@
 FROM openjdk:8-jdk-alpine
 
-ENV SCALA_VERSIONS='"2.11.12", "2.12.8"' \
-    SBT_VERSION=1.2.6 \
+ENV SCALA_VERSIONS='"2.11.12", "2.12.8", "2.12.10"' \
+    SBT_VERSION=1.2.8 \
     DOCKER_VERSION=18.09.9 \
     AWS_CLI_VERSION=1.17.9 \
     BUILD_PATH=/build
