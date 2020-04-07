@@ -4,6 +4,7 @@ ENV SCALA_VERSIONS='"2.11.12", "2.12.8", "2.12.10"' \
     SBT_VERSION=1.2.8 \
     DOCKER_VERSION=18.09.9 \
     AWS_CLI_VERSION=1.17.9 \
+    FLYWAY_VERSION=6.3.3 \
     BUILD_PATH=/build
 
 RUN mkdir -p ${BUILD_PATH}
@@ -11,7 +12,23 @@ RUN mkdir -p ${BUILD_PATH}
 WORKDIR /tmp
 
 RUN apk add --no-cache --update \
-    bash ca-certificates curl git openssh openssl python tar ncurses
+    bash ca-certificates curl git openssh openssl python sudo tar ncurses
+
+RUN apk add --no-cache --update postgresql \
+    && mkdir -p /var/lib/postgresql/data \
+    && chown postgres:postgres /var/lib/postgresql/data \
+    && mkdir -p /run/postgresql \
+    && chown postgres:postgres /run/postgresql/ \
+    && sudo -u postgres initdb /var/lib/postgresql/data \
+    && echo "listen_addresses = 'localhost'" >> /var/lib/postgresql/data/postgresql.conf
+
+RUN mkdir -p ${BUILD_PATH}/flyway \
+    && cd ${BUILD_PATH}/flyway \
+    && curl -Ls -o flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/${FLYWAY_VERSION}/flyway-commandline-${FLYWAY_VERSION}.tar.gz \
+    && tar -xzf flyway.tar.gz --strip-components=1 \
+    && rm flyway.tar.gz \
+    && ln -s ${BUILD_PATH}/flyway/flyway /usr/local/bin/flyway \
+    && cd -
 
 RUN curl -s -o awscli-bundle.zip "https://s3.amazonaws.com/aws-cli/awscli-bundle-${AWS_CLI_VERSION}.zip" \
     && unzip awscli-bundle.zip \
