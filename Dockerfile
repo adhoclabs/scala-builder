@@ -1,6 +1,6 @@
-FROM openjdk:8-jdk-alpine
+FROM openjdk:11-jre
 
-ENV SCALA_VERSIONS='"2.11.12", "2.12.8", "2.12.10", "2.13.2"' \
+ENV SCALA_VERSIONS='"2.12.10", "2.13.2"' \
     SBT_VERSION=1.3.12 \
     DOCKER_VERSION=18.09.9 \
     AWS_CLI_VERSION=1.17.9 \
@@ -13,23 +13,24 @@ RUN mkdir -p ${BUILD_PATH}
 WORKDIR /tmp
 
 # install baseline system packages
-RUN apk add --no-cache --update \
-    bash ca-certificates curl git jq openssh openssl python sudo tar ncurses
+RUN apt-get update \
+    && apt-get install -y \
+    bash ca-certificates curl git jq openssh-client openssl python sudo tar ncurses-base
 
 # install serverless framework
-RUN apk add --no-cache --update nodejs npm \
+RUN apt-get install -y nodejs npm \
     && npm install -g serverless@${SERVERLESS_VERSION}
 
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
 
-RUN apk add --no-cache --update postgresql \
+RUN apt-get install -y postgresql-11 \
     && mkdir -p /var/lib/postgresql/data \
     && chown postgres:postgres /var/lib/postgresql/data \
     && mkdir -p /run/postgresql \
     && chown postgres:postgres /run/postgresql/ \
-    && sudo -u postgres initdb /var/lib/postgresql/data \
-    && echo "listen_addresses = 'localhost'" >> /var/lib/postgresql/data/postgresql.conf \
+    && sudo -u postgres /usr/lib/postgresql/11/bin/initdb /var/lib/postgresql/data \
+    && echo "listen_addresses = 'localhost'" >> /etc/postgresql/11/main/postgresql.conf \
     && chmod +x /usr/local/bin/start_postgresdb.sh
 
 # install flyway
