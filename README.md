@@ -1,6 +1,6 @@
 # scala-builder
 
-Dockerfile for creating builder container for scala applications. Contains SBT, AWS CLI, Docker, PostgreSQL 11, Flyway, and Serverless Framework.
+Dockerfile for creating builder container for scala applications. Contains SBT, AWS CLI, Docker, PostgreSQL 11, Redis, Flyway, and Serverless Framework.
 
 Container is automatically published on [docker hub](https://hub.docker.com/r/ahlops/scala-builder)
 

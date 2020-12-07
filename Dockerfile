@@ -47,6 +47,9 @@ RUN curl -s -o awscli-bundle.zip "https://s3.amazonaws.com/aws-cli/awscli-bundle
     && chmod +x ./awscli-bundle/install \
     && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
 
+# install redis
+RUN apt-get install -y redis-server
+
 # install sbt
 RUN curl -Ls -o sbt.tar.gz "https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.tgz" \
     && tar -vxzf sbt.tar.gz \
