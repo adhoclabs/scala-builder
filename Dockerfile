@@ -1,11 +1,10 @@
 FROM openjdk:11-jre
 
-ENV SCALA_VERSIONS='"2.12.10", "2.13.2"' \
-    SBT_VERSION=1.3.12 \
-    DOCKER_VERSION=18.09.9 \
-    AWS_CLI_VERSION=1.17.9 \
-    FLYWAY_VERSION=6.3.3 \
-    SERVERLESS_VERSION=1.67.3 \
+ENV SCALA_VERSIONS='"2.12.12"' \
+    SBT_VERSION=1.4.6 \
+    DOCKER_VERSION=20.10.2 \
+    FLYWAY_VERSION=7.5.2 \
+    NVM_VERSION=0.37.2 \
     BUILD_PATH=/build
 
 RUN mkdir -p ${BUILD_PATH}
@@ -18,8 +17,10 @@ RUN apt-get update \
     bash ca-certificates curl git jq openssh-client openssl python sudo tar ncurses-base
 
 # install serverless framework
-RUN apt-get install -y nodejs npm \
-    && npm install -g serverless@${SERVERLESS_VERSION}
+RUN curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh" | bash \
+    && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
+    && nvm install node \
+    && npm install -g serverless
 
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
@@ -42,10 +43,10 @@ RUN mkdir -p ${BUILD_PATH}/flyway \
     && ln -s ${BUILD_PATH}/flyway/flyway /usr/local/bin/flyway \
     && cd -
 
-RUN curl -s -o awscli-bundle.zip "https://s3.amazonaws.com/aws-cli/awscli-bundle-${AWS_CLI_VERSION}.zip" \
-    && unzip awscli-bundle.zip \
-    && chmod +x ./awscli-bundle/install \
-    && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+# install aws-cli
+RUN curl -s -o awscliv2.zip "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+    && unzip awscliv2.zip \
+    && sudo ./aws/install -i /usr/local/aws -b /usr/local/bin
 
 # install redis
 RUN apt-get install -y redis-server
