@@ -5,6 +5,7 @@ ENV SCALA_VERSIONS='"2.12.12"' \
     DOCKER_VERSION=20.10.2 \
     FLYWAY_VERSION=7.5.2 \
     NODE_VERSION=15 \
+    SERVERLESS_VERSION=2.21.1 \
     BUILD_PATH=/build
 
 RUN mkdir -p ${BUILD_PATH}
@@ -19,7 +20,7 @@ RUN apt-get update \
 # install node and serverless framework
 RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
     && apt-get install -y nodejs \
-    && sudo npm install -g serverless
+    && sudo npm install -g "serverless@${SERVERLESS_VERSION}"
 
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
