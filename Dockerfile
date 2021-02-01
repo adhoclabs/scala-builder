@@ -4,7 +4,7 @@ ENV SCALA_VERSIONS='"2.12.12"' \
     SBT_VERSION=1.4.6 \
     DOCKER_VERSION=20.10.2 \
     FLYWAY_VERSION=7.5.2 \
-    NVM_VERSION=0.37.2 \
+    NODE_VERSION=15 \
     BUILD_PATH=/build
 
 RUN mkdir -p ${BUILD_PATH}
@@ -14,13 +14,12 @@ WORKDIR /tmp
 # install baseline system packages
 RUN apt-get update \
     && apt-get install -y \
-    bash ca-certificates curl git jq openssh-client openssl python sudo tar ncurses-base
+    bash ca-certificates curl git groff jq openssh-client openssl python sudo tar ncurses-base
 
-# install serverless framework
-RUN curl -o- "https://raw.githubusercontent.com/nvm-sh/nvm/v${NVM_VERSION}/install.sh" | bash \
-    && export NVM_DIR="$HOME/.nvm" && [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh" \
-    && nvm install node \
-    && npm install -g serverless
+# install node and serverless framework
+RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
+    && apt-get install -y nodejs \
+    && sudo npm install -g serverless
 
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
@@ -37,7 +36,7 @@ RUN apt-get install -y postgresql-11 \
 # install flyway
 RUN mkdir -p ${BUILD_PATH}/flyway \
     && cd ${BUILD_PATH}/flyway \
-    && curl -Ls -o flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/${FLYWAY_VERSION}/flyway-commandline-${FLYWAY_VERSION}.tar.gz \
+    && curl -Ls -o flyway.tar.gz "https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/${FLYWAY_VERSION}/flyway-commandline-${FLYWAY_VERSION}.tar.gz" \
     && tar -xzf flyway.tar.gz --strip-components=1 \
     && rm flyway.tar.gz \
     && ln -s ${BUILD_PATH}/flyway/flyway /usr/local/bin/flyway \
