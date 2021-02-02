@@ -1,11 +1,11 @@
 FROM openjdk:11-jre
 
-ENV SCALA_VERSIONS='"2.12.10", "2.13.2"' \
-    SBT_VERSION=1.3.12 \
-    DOCKER_VERSION=18.09.9 \
-    AWS_CLI_VERSION=1.17.9 \
-    FLYWAY_VERSION=6.3.3 \
-    SERVERLESS_VERSION=1.67.3 \
+ENV SCALA_VERSIONS='"2.12.12"' \
+    SBT_VERSION=1.4.6 \
+    DOCKER_VERSION=20.10.2 \
+    FLYWAY_VERSION=7.5.2 \
+    NODE_VERSION=15 \
+    SERVERLESS_VERSION=2.21.1 \
     BUILD_PATH=/build
 
 RUN mkdir -p ${BUILD_PATH}
@@ -15,11 +15,12 @@ WORKDIR /tmp
 # install baseline system packages
 RUN apt-get update \
     && apt-get install -y \
-    bash ca-certificates curl git jq openssh-client openssl python sudo tar ncurses-base
+    bash ca-certificates curl git groff jq openssh-client openssl python sudo tar ncurses-base
 
-# install serverless framework
-RUN apt-get install -y nodejs npm \
-    && npm install -g serverless@${SERVERLESS_VERSION}
+# install node and serverless framework
+RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
+    && apt-get install -y nodejs \
+    && sudo npm install -g "serverless@${SERVERLESS_VERSION}"
 
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
@@ -36,16 +37,16 @@ RUN apt-get install -y postgresql-11 \
 # install flyway
 RUN mkdir -p ${BUILD_PATH}/flyway \
     && cd ${BUILD_PATH}/flyway \
-    && curl -Ls -o flyway.tar.gz https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/${FLYWAY_VERSION}/flyway-commandline-${FLYWAY_VERSION}.tar.gz \
+    && curl -Ls -o flyway.tar.gz "https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/${FLYWAY_VERSION}/flyway-commandline-${FLYWAY_VERSION}.tar.gz" \
     && tar -xzf flyway.tar.gz --strip-components=1 \
     && rm flyway.tar.gz \
     && ln -s ${BUILD_PATH}/flyway/flyway /usr/local/bin/flyway \
     && cd -
 
-RUN curl -s -o awscli-bundle.zip "https://s3.amazonaws.com/aws-cli/awscli-bundle-${AWS_CLI_VERSION}.zip" \
-    && unzip awscli-bundle.zip \
-    && chmod +x ./awscli-bundle/install \
-    && ./awscli-bundle/install -i /usr/local/aws -b /usr/local/bin/aws
+# install aws-cli
+RUN curl -s -o awscliv2.zip "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" \
+    && unzip awscliv2.zip \
+    && sudo ./aws/install -i /usr/local/aws -b /usr/local/bin
 
 # install redis
 RUN apt-get install -y redis-server
