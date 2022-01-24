@@ -1,4 +1,4 @@
-FROM openjdk:11-jre
+FROM openjdk:11.0
 
 ENV SCALA_VERSIONS='"2.12.12"' \
     SBT_VERSION=1.4.6 \
