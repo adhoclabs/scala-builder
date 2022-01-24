@@ -25,13 +25,13 @@ RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
 
-RUN apt-get install -y postgresql-11 \
+RUN apt-get install -y postgresql-13 \
     && mkdir -p /var/lib/postgresql/data \
     && chown postgres:postgres /var/lib/postgresql/data \
     && mkdir -p /run/postgresql \
     && chown postgres:postgres /run/postgresql/ \
-    && sudo -u postgres /usr/lib/postgresql/11/bin/initdb /var/lib/postgresql/data \
-    && echo "listen_addresses = 'localhost'" >> /etc/postgresql/11/main/postgresql.conf \
+    && sudo -u postgres /usr/lib/postgresql/13/bin/initdb /var/lib/postgresql/data \
+    && echo "listen_addresses = 'localhost'" >> /etc/postgresql/13/main/postgresql.conf \
     && chmod +x /usr/local/bin/start_postgresdb.sh
 
 # install flyway
