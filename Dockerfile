@@ -1,37 +1,42 @@
-FROM openjdk:11.0
+FROM amazoncorretto:11-al2023
 
 ENV SCALA_VERSIONS='"2.12.12"' \
     SBT_VERSION=1.4.6 \
     DOCKER_VERSION=20.10.23 \
-    FLYWAY_VERSION=9.8.1 \
+    FLYWAY_VERSION=10.8.1 \
     NODE_VERSION=18 \
+    POSTGRES_VERSION=16 \
     SERVERLESS_VERSION=3.36.0 \
+    REDIS_VERSION=6 \
     BUILD_PATH=/build
 
 RUN mkdir -p ${BUILD_PATH}
 
 WORKDIR /tmp
 
+
+
 # install baseline system packages
-RUN apt-get update \
+RUN dnf upgrade \
     && apt-get install -y \
     bash ca-certificates curl git groff jq openssh-client openssl python sudo tar ncurses-base
 
 # install node and serverless framework
-RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
-    && apt-get install -y nodejs \
-    && sudo npm install -g "serverless@${SERVERLESS_VERSION}"
+RUN dnf install nodejs20 \
+    && dnf install npm \
+    && npm install -g npm@latest \
+    && npm install -g serverless@3.36.0
 
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
 
-RUN apt-get install -y postgresql-13 \
+RUN apt-get install -y postgresql-${POSTGRES_VERSION} \
     && mkdir -p /var/lib/postgresql/data \
     && chown postgres:postgres /var/lib/postgresql/data \
     && mkdir -p /run/postgresql \
     && chown postgres:postgres /run/postgresql/ \
-    && sudo -u postgres /usr/lib/postgresql/13/bin/initdb /var/lib/postgresql/data \
-    && echo "listen_addresses = 'localhost'" >> /etc/postgresql/13/main/postgresql.conf \
+    && sudo -u postgres /usr/lib/postgresql/${POSTGRES_VERSION}/bin/initdb /var/lib/postgresql/data \
+    && echo "listen_addresses = 'localhost'" >> /etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf \
     && chmod +x /usr/local/bin/start_postgresdb.sh
 
 # install flyway
