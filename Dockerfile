@@ -1,10 +1,11 @@
 FROM openjdk:11.0
 
-ENV SCALA_VERSIONS='"2.12.12"' \
-    SBT_VERSION=1.4.6 \
+ENV SCALA_VERSIONS='"2.12.18"' \
+    SBT_VERSION=1.9.8 \
     DOCKER_VERSION=20.10.23 \
-    FLYWAY_VERSION=9.8.1 \
+    FLYWAY_VERSION=9.22.0 \
     NODE_VERSION=18 \
+    POSTGRES_VERSION=16 \
     SERVERLESS_VERSION=3.36.0 \
     BUILD_PATH=/build
 
@@ -15,7 +16,7 @@ WORKDIR /tmp
 # install baseline system packages
 RUN apt-get update \
     && apt-get install -y \
-    bash ca-certificates curl git groff jq openssh-client openssl python sudo tar ncurses-base
+    bash ca-certificates curl git groff jq lsb-release openssh-client openssl python sudo tar ncurses-base
 
 # install node and serverless framework
 RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
@@ -25,13 +26,17 @@ RUN curl -sL "https://deb.nodesource.com/setup_${NODE_VERSION}.x" | bash - \
 # install postgresdb
 COPY bin/start_postgresdb.sh /usr/local/bin/
 
-RUN apt-get install -y postgresql-13 \
+#install postgres: https://www.postgresql.org/download/linux/debian/
+RUN sudo sh -c 'echo "deb https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list' \
+    && wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo apt-key add - \
+    && apt-get update \
+    && apt-get -y install postgresql-${POSTGRES_VERSION} \
     && mkdir -p /var/lib/postgresql/data \
     && chown postgres:postgres /var/lib/postgresql/data \
     && mkdir -p /run/postgresql \
     && chown postgres:postgres /run/postgresql/ \
-    && sudo -u postgres /usr/lib/postgresql/13/bin/initdb /var/lib/postgresql/data \
-    && echo "listen_addresses = 'localhost'" >> /etc/postgresql/13/main/postgresql.conf \
+    && sudo -u postgres /usr/lib/postgresql/${POSTGRES_VERSION}/bin/initdb /var/lib/postgresql/data \
+    && echo "listen_addresses = 'localhost'" >> /etc/postgresql/${POSTGRES_VERSION}/main/postgresql.conf \
     && chmod +x /usr/local/bin/start_postgresdb.sh
 
 # install flyway
